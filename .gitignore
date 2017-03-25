@@ -1,5 +1,12 @@
 *.class
 
+.DS_Store
+/CVS/*
+**/CVS/*
+.cvsignore
+*/.cvsignore
+
+
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 

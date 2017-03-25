@@ -1,0 +1,10 @@
+Name: clean-jdbc.util
+Requires: os.java
+Augments: 
+Suggests: 
+Declares: 
+Provides:	\
+			build-task:increment:build-number.txt \
+			build-task:classpath.java.jar:jdbc.util-4.9.0 \
+			build-task:classpath.java.jar:--increment:build-number.txt:jdbc.util-4.8.9 \
+			build-task:pack.txz:--suffix:build-number.txt:jdbc.util-4.9.0:java/ \
