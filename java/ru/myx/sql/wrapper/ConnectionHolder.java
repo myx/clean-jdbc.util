@@ -7,39 +7,35 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-/**
- * @author myx
- *
- */
+/** @author myx */
 final class ConnectionHolder {
 	
-	private static final byte DT_UNKNOWN = 0;
-
 	private static final byte DT_NORMAL = 1;
-
+	
 	private static final byte DT_ORACLE = 2;
-
+	
+	private static final byte DT_UNKNOWN = 0;
+	
 	private final ConnectionInfo ci;
-
-	protected long date;
-
-	protected int loops;
-
+	
 	private Connection conn;
-
+	
 	private byte databaseType;
-
+	
+	protected long date;
+	
+	protected int loops;
+	
 	ConnectionHolder(final ConnectionInfo ci) {
+		
 		this.ci = ci;
 		this.conn = ci.createConnection();
 		this.databaseType = ConnectionHolder.DT_UNKNOWN;
 		this.loops = ci.connectionMaxLoops();
 		this.date = System.currentTimeMillis() + ci.connectionTimeToLive();
 	}
-
-	/**
-	 * goal: to check is connection alive
-	 */
+	
+	/** goal: to check is connection alive */
 	final boolean checkAlive() {
 		
 		if (this.conn == null) {
@@ -65,17 +61,16 @@ final class ConnectionHolder {
 					: ConnectionHolder.DT_ORACLE;
 			}
 			try (final Statement st = this.conn.createStatement()) {
-				/**
-				 * Do not use it here, may be unsupported?
-				 */
+				/** Do not use it here, may be unsupported? */
 				try {
 					st.setQueryTimeout(10);
 				} catch (final Throwable t) {
 					// ignore
 				}
-				st.execute(this.databaseType == ConnectionHolder.DT_ORACLE
-					? "SELECT 5 FROM DUAL"
-					: "SELECT 5");
+				st.execute(
+						this.databaseType == ConnectionHolder.DT_ORACLE
+							? "SELECT 5 FROM DUAL"
+							: "SELECT 5");
 			}
 			return true;
 		} catch (final SQLException e) {
@@ -90,10 +85,8 @@ final class ConnectionHolder {
 			return false;
 		}
 	}
-
-	/**
-	 * goal: to get alive connection
-	 */
+	
+	/** goal: to get alive connection */
 	final void checkEnsure() {
 		
 		try {
@@ -122,17 +115,16 @@ final class ConnectionHolder {
 					: ConnectionHolder.DT_ORACLE;
 			}
 			try (final Statement st = this.conn.createStatement()) {
-				/**
-				 * Do not use it here, may be unsupported?
-				 */
+				/** Do not use it here, may be unsupported? */
 				try {
 					st.setQueryTimeout(10);
 				} catch (final Throwable t) {
 					// ignore
 				}
-				st.execute(this.databaseType == ConnectionHolder.DT_ORACLE
-					? "SELECT 5 FROM DUAL"
-					: "SELECT 5");
+				st.execute(
+						this.databaseType == ConnectionHolder.DT_ORACLE
+							? "SELECT 5 FROM DUAL"
+							: "SELECT 5");
 			}
 		} catch (final SQLException e) {
 			if (this.conn != null) {
@@ -148,7 +140,7 @@ final class ConnectionHolder {
 			this.date = System.currentTimeMillis() + this.ci.connectionTimeToLive();
 		}
 	}
-
+	
 	final void destroy() {
 		
 		final Connection conn = this.conn;
@@ -161,7 +153,7 @@ final class ConnectionHolder {
 			}
 		}
 	}
-
+	
 	final Connection getConnection() throws SQLException {
 		
 		if (this.conn == null || this.conn.isClosed()) {
@@ -176,7 +168,7 @@ final class ConnectionHolder {
 		}
 		return this.conn;
 	}
-
+	
 	final void release() throws SQLException {
 		
 		if (this.conn != null && !this.conn.isClosed()) {

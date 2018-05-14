@@ -10,37 +10,38 @@ import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 
-/**
- * @author barachta
+/** @author barachta
  * 
  * 
- *         To change the template for this generated type comment go to
- *         Window>Preferences>Java>Code Generation>Code and Comments
- */
+ *         To change the template for this generated type comment go to Window>Preferences>Java>Code
+ *         Generation>Code and Comments */
 final class PoolChecker extends Thread {
-	private static final long	CHECK_INTERVAL		= 1000L;
 	
-	private static final long	CHECK_LOOP_INTERVAL	= 10000L;
+	private static final long CHECK_INTERVAL = 1000L;
 	
-	static final List<Runnable>	TO_CHECK			= new ArrayList<>();
+	private static final long CHECK_LOOP_INTERVAL = 10000L;
+	
+	static final List<Runnable> TO_CHECK = new ArrayList<>();
 	static {
 		new PoolChecker().start();
 	}
 	
 	private PoolChecker() {
-		super( null, null, "Connection checker thread (mwm.sql.driver)" );
-		this.setDaemon( true );
+		
+		super(null, null, "Connection checker thread (mwm.sql.driver)");
+		this.setDaemon(true);
 	}
 	
 	@Override
 	public final void run() {
+		
 		for (; !Thread.interrupted();) {
 			try {
 				for (final Runnable current : PoolChecker.TO_CHECK) {
 					current.run();
 					try {
 						synchronized (this) {
-							this.wait( PoolChecker.CHECK_INTERVAL );
+							this.wait(PoolChecker.CHECK_INTERVAL);
 						}
 					} catch (final InterruptedException e) {
 						return;
@@ -48,7 +49,7 @@ final class PoolChecker extends Thread {
 				}
 				try {
 					synchronized (this) {
-						this.wait( PoolChecker.CHECK_LOOP_INTERVAL );
+						this.wait(PoolChecker.CHECK_LOOP_INTERVAL);
 					}
 				} catch (final InterruptedException e) {
 					return;
@@ -63,6 +64,7 @@ final class PoolChecker extends Thread {
 	
 	@Override
 	public final String toString() {
+		
 		return "POOL-CHECKER";
 	}
 }

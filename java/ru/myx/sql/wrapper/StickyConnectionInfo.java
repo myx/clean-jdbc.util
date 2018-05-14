@@ -8,30 +8,30 @@ import java.util.Properties;
 
 class StickyConnectionInfo implements ConnectionInfo, Runnable {
 	
-	private final String				realUrl;
+	private final int caps;
 	
-	private final Driver				driver;
+	private final Driver driver;
 	
-	private final Properties			info;
+	private int head = 0;
 	
-	private final ConnectionHolder[]	list;
+	private final Properties info;
 	
-	private final long[]				till;
+	private final ConnectionHolder[] list;
 	
-	private int							head	= 0;
+	private final int mask;
 	
-	private int							tail	= 0;
+	private final String realUrl;
 	
-	private int							size	= 0;
+	private int size = 0;
 	
-	private final int					caps;
+	private int tail = 0;
 	
-	private final int					mask;
+	private final long[] till;
 	
-	StickyConnectionInfo(final int capacity, final int urlPrefixLength, final String url, final Properties info)
-			throws SQLException {
-		this.realUrl = url.substring( urlPrefixLength );
-		this.driver = DriverManager.getDriver( this.realUrl );
+	StickyConnectionInfo(final int capacity, final int urlPrefixLength, final String url, final Properties info) throws SQLException {
+		
+		this.realUrl = url.substring(urlPrefixLength);
+		this.driver = DriverManager.getDriver(this.realUrl);
 		this.info = info;
 		this.caps = capacity;
 		this.mask = capacity - 1;
@@ -41,28 +41,32 @@ class StickyConnectionInfo implements ConnectionInfo, Runnable {
 	
 	@Override
 	public final int connectionMaxLoops() {
+		
 		return Integer.MAX_VALUE;
 	}
 	
 	@Override
 	public long connectionTimeToLive() {
+		
 		return 300000L;
 	}
 	
 	@Override
 	public Connection createConnection() {
+		
 		try {
-			final Connection result = this.driver.connect( this.realUrl, this.info );
+			final Connection result = this.driver.connect(this.realUrl, this.info);
 			if (result == null) {
-				throw new RuntimeException( "No connection for: " + this.realUrl );
+				throw new RuntimeException("No connection for: " + this.realUrl);
 			}
 			return result;
 		} catch (final SQLException e) {
-			throw new RuntimeException( e );
+			throw new RuntimeException(e);
 		}
 	}
 	
 	final ConnectionHolder nextConnectionHolder() {
+		
 		final ConnectionHolder ready;
 		synchronized (this) {
 			if (this.size > 0) {
@@ -75,7 +79,7 @@ class StickyConnectionInfo implements ConnectionInfo, Runnable {
 			}
 		}
 		if (ready == null) {
-			return new ConnectionHolder( this );
+			return new ConnectionHolder(this);
 		}
 		ready.checkAlive();
 		return ready;
@@ -83,6 +87,7 @@ class StickyConnectionInfo implements ConnectionInfo, Runnable {
 	
 	@Override
 	public void reuse(final ConnectionHolder hldr) {
+		
 		final long time = System.currentTimeMillis();
 		if (hldr.date <= time) {
 			hldr.destroy();
@@ -121,6 +126,7 @@ class StickyConnectionInfo implements ConnectionInfo, Runnable {
 	
 	@Override
 	public void run() {
+		
 		final long time = System.currentTimeMillis();
 		for (;;) {
 			final ConnectionHolder removed;
@@ -144,6 +150,7 @@ class StickyConnectionInfo implements ConnectionInfo, Runnable {
 	
 	@Override
 	public final String toString() {
+		
 		return "sci{url=" + this.realUrl + '}';
 	}
 	

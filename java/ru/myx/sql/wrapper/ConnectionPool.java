@@ -19,27 +19,26 @@ import java.util.Map;
 // //////////////////////////////////////////////////////////////////////////
 final class ConnectionPool extends ConnectionFilter {
 	
+	private boolean autocommit = true;
 	
 	private final ConnectionHolder holder;
-
-	private boolean rdo = false;
-
+	
 	private String oldCatalog = null;
-
-	private Map<String, Class<?>> oldTypeMap = null;
-
+	
 	private int oldTILevel = -1;
-
-	private boolean autocommit = true;
-
+	
+	private Map<String, Class<?>> oldTypeMap = null;
+	
+	private boolean rdo = false;
+	
 	ConnectionPool(final ConnectionHolder holder) throws SQLException {
+		
 		super(holder.getConnection());
 		this.holder = holder;
 	}
-
+	
 	@Override
 	public final void close() throws SQLException {
-		
 		
 		final Connection parent = this.parent;
 		if (parent != null) {
@@ -75,39 +74,34 @@ final class ConnectionPool extends ConnectionFilter {
 			}
 		}
 	}
-
+	
 	@Override
 	protected final PreparedStatement convert(final PreparedStatement st) {
 		
-		
 		return st;
 	}
-
+	
 	@Override
 	public final void setAutoCommit(final boolean autoCommit) throws SQLException {
 		
-		
 		super.setAutoCommit(this.autocommit = autoCommit);
 	}
-
+	
 	@Override
 	public final void setCatalog(final String catalog) throws SQLException {
-		
 		
 		this.oldCatalog = super.getCatalog();
 		super.setCatalog(catalog);
 	}
-
+	
 	@Override
 	public final void setReadOnly(final boolean readOnly) throws SQLException {
 		
-		
 		super.setReadOnly(this.rdo = readOnly);
 	}
-
+	
 	@Override
 	public final void setTransactionIsolation(final int level) throws SQLException {
-		
 		
 		if (this.oldTILevel == -1) {
 			this.oldTILevel = super.getTransactionIsolation();
@@ -116,10 +110,9 @@ final class ConnectionPool extends ConnectionFilter {
 			super.setTransactionIsolation(level);
 		}
 	}
-
+	
 	@Override
 	public final void setTypeMap(final Map<String, Class<?>> map) throws SQLException {
-		
 		
 		this.oldTypeMap = super.getTypeMap();
 		super.setTypeMap(map);

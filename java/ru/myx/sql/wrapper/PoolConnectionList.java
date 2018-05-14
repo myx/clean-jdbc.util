@@ -7,21 +7,23 @@
 package ru.myx.sql.wrapper;
 
 final class PoolConnectionList {
-	private final PoolConnectionInfo	ci;
 	
-	private final ConnectionHolder[]	list;
+	private final int caps;
 	
-	private int							head	= 0;
+	private final PoolConnectionInfo ci;
 	
-	private int							tail	= 0;
+	private int head = 0;
 	
-	private int							size	= 0;
+	private final ConnectionHolder[] list;
 	
-	private final int					caps;
+	private final int mask;
 	
-	private final int					mask;
+	private int size = 0;
+	
+	private int tail = 0;
 	
 	PoolConnectionList(final int capacity, final PoolConnectionInfo ci) {
+		
 		this.caps = capacity;
 		this.mask = capacity - 1;
 		this.list = new ConnectionHolder[capacity];
@@ -29,6 +31,7 @@ final class PoolConnectionList {
 	}
 	
 	final void check() {
+		
 		synchronized (this) {
 			for (int i = this.size - 1, head = this.head; i >= 0; --i) {
 				this.list[(--head) & this.mask].checkEnsure();
@@ -37,10 +40,11 @@ final class PoolConnectionList {
 				return;
 			}
 		}
-		this.reuse( new ConnectionHolder( this.ci ) );
+		this.reuse(new ConnectionHolder(this.ci));
 	}
 	
 	final ConnectionHolder nextConnectionHolder() {
+		
 		synchronized (this) {
 			if (this.size > 0) {
 				this.size--;
@@ -52,10 +56,11 @@ final class PoolConnectionList {
 				}
 			}
 		}
-		return new ConnectionHolder( this.ci );
+		return new ConnectionHolder(this.ci);
 	}
 	
 	final boolean reuse(final ConnectionHolder hldr) {
+		
 		synchronized (this) {
 			if (this.size < this.caps) {
 				this.size++;

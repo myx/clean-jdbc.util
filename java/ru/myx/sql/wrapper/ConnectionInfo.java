@@ -4,23 +4,16 @@ import java.sql.Connection;
 
 interface ConnectionInfo {
 	
-	/**
-	 * @return long
-	 */
-	long connectionTimeToLive();
-	
-	/**
-	 * @return connection
-	 */
-	Connection createConnection();
-	
-	/**
-	 * @return int
-	 */
+	/** @return int */
 	int connectionMaxLoops();
 	
-	/**
-	 * @param poolConnectionHolder
+	/** @return long */
+	long connectionTimeToLive();
+	
+	/** @return connection */
+	Connection createConnection();
+	
+	/** @param poolConnectionHolder
 	 */
 	void reuse(final ConnectionHolder poolConnectionHolder);
 	

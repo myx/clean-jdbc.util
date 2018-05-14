@@ -21,17 +21,20 @@ import java.util.Properties;
 // //////////////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////////////
 final class PoolConnectionInfo implements ConnectionInfo, Runnable {
+	
 	static final String getKey1(final String url, final Properties info) {
-		return url + '#' + System.identityHashCode( info );
+		
+		return url + '#' + System.identityHashCode(info);
 	}
 	
 	static final String getKey2(final String url, final Properties info) {
-		final StringBuilder key = new StringBuilder( url.length() << 1 ).append( url ).append( '?' );
+		
+		final StringBuilder key = new StringBuilder(url.length() << 1).append(url).append('?');
 		for (;;) {
 			try {
 				for (final Object object : info.keySet()) {
 					final String name = object.toString();
-					key.append( name ).append( '=' ).append( info.getProperty( name ) ).append( ';' );
+					key.append(name).append('=').append(info.getProperty(name)).append(';');
 				}
 				return key.toString();
 			} catch (final ConcurrentModificationException e) {
@@ -40,76 +43,79 @@ final class PoolConnectionInfo implements ConnectionInfo, Runnable {
 		}
 	}
 	
-	private final PoolConnectionList[]	lists;
+	private int counterCheck = 0;
 	
-	private final int					mask;
+	private int counterGet = 0;
 	
-	private int							counterGet		= 0;
+	private int counterLoops = 0;
 	
-	private int							counterReuse	= 0;
+	private int counterReuse = 0;
 	
-	private int							counterCheck	= 0;
+	private final Driver driver;
 	
-	private int							counterLoops	= 0;
+	private final Properties info;
 	
-	private final String				realUrl;
+	private final PoolConnectionList[] lists;
 	
-	private final Driver				driver;
+	private final int mask;
 	
-	private final Properties			info;
+	private final String realUrl;
 	
-	PoolConnectionInfo(final int leafs,
-			final int leafCapacity,
-			final int urlPrefixLength,
-			final String url,
-			final Properties info) throws SQLException {
-		this.realUrl = url.substring( urlPrefixLength );
-		this.driver = DriverManager.getDriver( this.realUrl );
+	PoolConnectionInfo(final int leafs, final int leafCapacity, final int urlPrefixLength, final String url, final Properties info) throws SQLException {
+		
+		this.realUrl = url.substring(urlPrefixLength);
+		this.driver = DriverManager.getDriver(this.realUrl);
 		this.info = info;
 		this.lists = new PoolConnectionList[leafs + 1];
 		for (int i = leafs; i >= 0; --i) {
-			this.lists[i] = new PoolConnectionList( leafCapacity, this );
+			this.lists[i] = new PoolConnectionList(leafCapacity, this);
 		}
 		this.mask = leafs - 1;
 	}
 	
 	@Override
 	public final int connectionMaxLoops() {
+		
 		return 128 + ((--this.counterLoops) & 0xF);
 	}
 	
 	@Override
 	public final long connectionTimeToLive() {
+		
 		return 300000L;
 	}
 	
 	@Override
 	public final Connection createConnection() {
+		
 		try {
-			final Connection result = this.driver.connect( this.realUrl, this.info );
+			final Connection result = this.driver.connect(this.realUrl, this.info);
 			if (result == null) {
-				throw new RuntimeException( "No connection for: " + this.realUrl );
+				throw new RuntimeException("No connection for: " + this.realUrl);
 			}
 			return result;
 		} catch (final SQLException e) {
-			throw new RuntimeException( e );
+			throw new RuntimeException(e);
 		}
 	}
 	
 	final ConnectionHolder nextConnectionHolder() {
+		
 		final ConnectionHolder holder = this.lists[(--this.counterGet) & this.mask].nextConnectionHolder();
 		return holder;
 	}
 	
 	@Override
 	public final void reuse(final ConnectionHolder holder) {
-		if (!this.lists[(--this.counterReuse) & this.mask].reuse( holder )) {
+		
+		if (!this.lists[(--this.counterReuse) & this.mask].reuse(holder)) {
 			holder.destroy();
 		}
 	}
 	
 	@Override
 	public final void run() {
+		
 		try {
 			final int index = (--this.counterCheck) & this.mask;
 			final PoolConnectionList list = this.lists[this.lists.length - 1];
@@ -123,6 +129,7 @@ final class PoolConnectionInfo implements ConnectionInfo, Runnable {
 	
 	@Override
 	public final String toString() {
+		
 		return "pci{url=" + this.realUrl + '}';
 	}
 }
