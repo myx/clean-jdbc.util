@@ -1,8 +1,5 @@
 Name: clean-jdbc.util
-Requires: os.java
-Augments: 
-Suggests: 
-Declares: 
+Suggests: os.java
 Provides:	\
 			build-prepare:compile-java \
 			build-task:increment:build-number.txt \
