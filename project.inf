@@ -1,7 +1,7 @@
 Name: clean-jdbc.util
 Suggests: os.java
 Provides:	\
-			build-prepare:compile-java \
+			source-process:compile-java \
 			build-task:increment:build-number.txt \
 			build-task:classpath.java.jar:jdbc.util-4.9.0 \
 			build-task:classpath.java.jar:--increment:build-number.txt:jdbc.util-4.8.9 \
